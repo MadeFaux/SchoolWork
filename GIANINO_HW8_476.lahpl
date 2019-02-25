@@ -1,0 +1,126 @@
+CLUNIT: DigDisp(In).
+INPUTS: In[4].
+OUTPUTS: Out[8].
+BODY.
+
+Out[0]= In[0] | In[3] & (In[2] | In[1]) | ~In[1]&~In[3];
+Out[1]= ~In[1] | In[2]&In[3] | ~In[2]&~In[3];
+Out[2]= ~(~In[0] & ~In[1] & In[2] & ~In[3]);
+Out[3]= ~In[3] &(In[0] ^ In[2]) | ~In[2] &~(In[1] ^In[3]) | ~In[1]& In[2];
+Out[4]= ~In[3] & (~In[1] |In[2]);
+Out[5]= In[0] | In[1] & (~In[3] |~In[2])| ~In[3] & ~In[2];	
+Out[6]= In[2] & (~In[3] |~In[1]) | ~In[2] &(In[1] | In[0]).
+END.
+
+$$======================================================================================================================================================================
+
+CLUNIT:	Incrmt(X){N}.
+INPUTS:	X[N].
+OUTPUTS:	Out[N].
+CTERMS:	Cy[N].
+BODY.
+FOR J=N-1 TO 0  CONSTRUCT
+IF J == N-1  THEN
+     Cy[J] = 1.
+ELSE
+     Cy[J] = X[J+1] & Cy[J+1].
+FI.
+ROF;
+FOR J=N-1  TO  0  CONSTRUCT
+Out[J]  =  X[J] ^ Cy[J].
+ROF.
+
+END.
+
+$$======================================================================================================================================================================
+
+CLUNIT: Counter(Num).
+INPUTS: Num[4].
+OUTPUTS: Result[4]. 
+BODY.
+
+	Result[3] = ~Num[3];
+	Result[2] = ~Num[0] & (Num[2] ^ Num[3]);
+	Result[1] = ~Num[0] & (Num[1] & ~Num[2] | ~Num[1] & Num[2] & Num[3] | Num[1] & Num[2] & ~Num[3]);
+	Result[0] = (~Num[0] & Num[1] & Num[2] & Num[3]) | (Num[0] & ~Num[1] & ~Num[2] & ~Num[3]).
+END.
+
+$$======================================================================================================================================================================
+
+MODULE: 8BIT.
+INPUTS: Bit[8]; Start.
+OUTPUTS: Display[24].
+MEMORY: Toggle[1]; Numb[8]; OnesMem[4]; TensMem[4]; HundMem[4].
+CLUNITS: OneDisp[4]<: DigDisp; TenDisp[4]<:DigDisp; HundDisp[4]<:DigDisp; OnesCount[4]<:Counter; TenCount[4]<:Counter; HundCount[4]<:Counter; Inc[8]<:Incrmt{8}.
+START.
+
+0	Toggle<-Start;
+	->(0)/(~(Start ^ Toggle));
+	Numb<-Bit.
+
+1	OnesMem<-4#0; 
+	TensMem<-4#0;	 		$$Set to 0
+	HundMem<-4#0.
+
+2	->(3,5)/((OnesMem[0] & ~OnesMem[1] & ~OnesMem[2] & OnesMem[3]), (~(OnesMem[0] & ~OnesMem[1] & ~OnesMem[2] & OnesMem[3])));
+	Numb<- ~Inc(~Numb);
+	OnesMem<-OnesCount(OnesMem);	
+	Display[0:7] = HundDisp(HundMem);
+	Display[8:15] = TenDisp(TensMem);
+	Display[16:23] = OneDisp(OnesMem).
+
+												  
+3	->(4,5)/((TensMem[0] & ~TensMem[1] & ~TensMem[2] & TensMem[3]),(~(TensMem[0] & ~TensMem[1] & ~TensMem[2] & TensMem[3])));
+	TensMem<-TenCount(TensMem).
+															
+4	HundMem<-TenCount(HundMem).   
+	
+5	->(2)/(~(~Numb[0] & ~Numb[1] & ~Numb[2] & ~Numb[3] & ~Numb[4]& ~Numb[5]& ~Numb[6]& ~Numb[7] ));
+	
+	Display[16:23] = OneDisp(OnesMem);
+	Display[8:15] = TenDisp(TensMem);
+	Display[0:7] = HundDisp(HundMem).
+	
+6	->(0).	  	$$Restart							
+
+END.
+$! ToggleSwitches = Bit
+$! ToggleSwitches = Start
+$! SevenSegmentDisplay = Display
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

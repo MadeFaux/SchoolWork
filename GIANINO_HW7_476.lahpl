@@ -1,0 +1,88 @@
+CLUNIT:	FullAdd( x; y; Cin).
+INPUTS:	x; y; Cin.
+OUTPUTS:	FullAdd[2].
+CTERMS:	a; b; c; sum; cout.
+BODY.
+  a = x ^ y;
+  sum = a ^ Cin;
+  b = x & y;
+  c = a & Cin;
+  cout = b | c;
+  FullAdd[0] = cout;
+  FullAdd[1] = sum.
+END.
+
+CLUNIT:	Adder(X; Y; Cin){I}.
+INPUTS:	X[I]; Y[I]; Cin.
+OUTPUTS:	Sumout[I+1].
+CLUNITS:	FA[2] <: FullAdd.
+CTERMS:		Cy[I]; Sum[I].
+BODY. 
+Cy[I-1],Sum[I-1]  =  FA( X[I-1]; Y[I-1]; Cin);
+FOR J = I-2 TO 0  CONSTRUCT
+	Cy[J],Sum[J]  =  FA( X[J]; Y[J]; Cy[J+1] ).
+ROF;
+Sumout = Cy[0],Sum.
+END.
+
+$$=======================================================================================================================
+
+CLUNIT:	Incrmt(X){N}.
+INPUTS:	X[N].
+OUTPUTS:	Out[N].
+CTERMS:	Cy[N].
+BODY.
+FOR J=N-1 TO 0  CONSTRUCT
+IF J == N-1  THEN
+     Cy[J] = 1.
+ELSE
+     Cy[J] = X[J+1] & Cy[J+1].
+FI.
+ROF;
+FOR J=N-1  TO  0  CONSTRUCT
+Out[J]  =  X[J] ^ Cy[J].
+ROF.
+END.
+
+$$========================================================================================================================
+
+MODULE: 8BitMult.
+INPUTS: NumOne[8]; NumTwo[8]; Start.
+MEMORY: Holder[16]; NumOneReg[8]; NumTwoReg[8]; ans[16]; Total[17]; Flipper. 
+OUTPUTS: Out[17]. 
+CLUNITS: Add[17]<:Adder{16}; Inc[8]<:Incrmt{8}.
+START.
+
+A	Flipper <- Start.
+
+B	->(B)/(Start & Flipper | ~Start & ~Flipper).
+
+C	Holder<- 16#0;
+	ans <- 16#0;
+	NumOneReg <- NumOne; 
+	NumTwoReg <- NumTwo.
+	
+D	Holder<- Holder[8:15], NumOneReg.
+	
+E	->(H)/(&/~NumTwoReg[0:7]).
+
+F	Total<-Add(Holder; ans; 0).
+
+G	ans <- Total[1:16];
+	NumTwoReg <- ~Inc(~NumTwoReg);    $$Thanks for this Prof. Kohne 
+	-> (E).
+
+H	-> (A).
+
+ENDSEQUENCE.
+Out=Total.
+
+END. 
+$! ToggleSwitches = Start
+$! BinaryLights = Out
+$! ToggleSwitches = NumOne
+$! ToggleSwitches = NumTwo
+
+
+
+

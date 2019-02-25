@@ -1,0 +1,46 @@
+MODULE: TrafficLights.
+INPUTS: Cross.
+MEMORY: ThruReg[3]; CrossReg[3].
+OUTPUTS: ThruOut[3]; CrossOut[3].
+
+START.
+
+Init	
+	ThruReg <- 0,0,1;
+	CrossReg <- 1,0,0.
+
+S1	-> (Init, S2)/(~Cross, Cross).
+
+S2	ThruReg <- 0,1,0;
+	CrossReg <- 1,0,0.
+
+S3	ThruReg <- 1,0,0;
+	CrossReg <- 0,0,1.
+
+S4 	ThruReg <- 1,0,0;
+	CrossReg <- 0,1,0.
+
+S5 	ThruReg <- 0,0,1;
+	CrossReg <- 1,0,0;
+	->(Init).
+ENDSEQUENCE.
+	ThruOut = ThruReg;
+	CrossOut = CrossReg.
+END.
+
+$! TrafficIntersection
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,47 @@
+MODULE: DSCPrinter.
+INPUTS: ComputerData[16]; ComputerReady; PrinterReady; PrinterBusy; Fast; Single.
+OUTPUTS: PrintCmd; PrintData[8]; ComputerAccept.
+MEMORY: InReg[16]; Finish; OutReg[8]; AR.
+START. 
+1 	AR<-Single;
+	->(1)/(~ComputerReady).
+
+2 	InReg<-ComputerData.
+
+3 	ComputerAccept=1;
+	Finish<-0;
+	->(4,7)/(Fast, ~Fast).
+
+4 	OutReg<-InReg[0:7];
+	->(4)/(~PrinterReady|PrinterBusy).
+
+5 	PrintCmd=1;
+	PrintData = OutReg;
+	InReg[0:7]<-InReg[8:15];
+	->(9)/(~Fast);
+	Finish<-1;
+	->(4)/(~Finish).
+
+6 	->(10).
+
+7 	->(1,8,5)/( ~((AR^Single)&~Fast) ,((AR^Single)&~Fast), Fast). $Check the toggle$
+
+8 	OutReg<-InReg[0:7];
+	->(8)/(~PrinterReady|PrinterBusy).
+
+
+9 	PrintCmd=1;
+	PrintData = OutReg;
+	InReg[0:7]<-InReg[8:15];
+	Finish<-1;
+	->(4)/(Fast);
+	->(8)/(~Finish).
+
+10 ->(1).
+
+ENDSEQUENCE.
+END.
+$! DataSourceComputer
+$! CharacterPrinter
+$! ToggleSwitches = Fast
+$! ToggleSwitches = Single
